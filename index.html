@@ -1440,48 +1440,8 @@
     <div class="section-label">Our Community</div>
     <h2>Meet the <em>Members</em></h2>
   </div>
-
-  <div class="members-grid">
-    <div class="member-card reveal">
-      <div class="member-avatar" style="background: linear-gradient(135deg, #8b3a1a, #c0522a);">E</div>
-      <div class="member-name">Elena Vasquez</div>
-      <div class="member-role">Founder & Host</div>
-      <div class="member-fav">One Hundred Years of Solitude</div>
-    </div>
-
-    <div class="member-card reveal">
-      <div class="member-avatar" style="background: linear-gradient(135deg, #1a3a5c, #2a5a8c);">M</div>
-      <div class="member-name">Marcus Chen</div>
-      <div class="member-role">Librarian</div>
-      <div class="member-fav">The Brothers Karamazov</div>
-    </div>
-
-    <div class="member-card reveal">
-      <div class="member-avatar" style="background: linear-gradient(135deg, #2a4a2a, #4a7a4a);">S</div>
-      <div class="member-name">Sofia Andreou</div>
-      <div class="member-role">Secretary</div>
-      <div class="member-fav">Middlemarch</div>
-    </div>
-
-    <div class="member-card reveal">
-      <div class="member-avatar" style="background: linear-gradient(135deg, #4a2a4a, #7a4a7a);">J</div>
-      <div class="member-name">James Okafor</div>
-      <div class="member-role">Member</div>
-      <div class="member-fav">Things Fall Apart</div>
-    </div>
-
-    <div class="member-card reveal">
-      <div class="member-avatar" style="background: linear-gradient(135deg, #4a3a1a, #8a6a2a);">A</div>
-      <div class="member-name">Amara Diallo</div>
-      <div class="member-role">Member</div>
-      <div class="member-fav">Half of a Yellow Sun</div>
-    </div>
-
-    <div class="member-card reveal" style="display:flex; flex-direction:column; justify-content:center; align-items:center; border-style: dashed; cursor:pointer; min-height: 200px;">
-      <div style="font-size:2rem; color:var(--amber); margin-bottom:0.5rem;">+</div>
-      <div style="font-family:'Playfair Display',serif; font-size:1rem; margin-bottom:0.3rem;">Your Spot</div>
-      <div style="font-size:0.8rem; opacity:0.5;">Join Biblionis</div>
-    </div>
+  <div class="members-grid" id="members-grid">
+    <!-- Rendered by JS -->
   </div>
 </section>
 
@@ -2091,7 +2051,114 @@
     }
     body.edit-mode [data-editable]:hover::after { opacity: 1; }
 
-    /* Save toast */
+    /* Member remove button */
+    .member-remove-btn {
+      display: none;
+      position: absolute;
+      top: 0.6rem; right: 0.6rem;
+      background: var(--rust);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      align-items: center; justify-content: center;
+      line-height: 1;
+      z-index: 10;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .member-remove-btn:hover { background: #5a1a08; transform: scale(1.1); }
+    body.edit-mode .member-card { position: relative; }
+    body.edit-mode .member-remove-btn { display: flex; }
+
+    /* Add member button in edit mode */
+    #add-member-btn {
+      display: none;
+      margin: 1.5rem auto 0;
+      padding: 0.75rem 2rem;
+      background: none;
+      border: 2px dashed rgba(184,114,26,0.4);
+      color: var(--amber);
+      font-family: 'Lora', serif;
+      font-size: 0.88rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    #add-member-btn:hover { background: rgba(184,114,26,0.07); border-color: var(--amber); }
+    body.edit-mode #add-member-btn { display: block; }
+
+    /* Add member modal */
+    #add-member-modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(43,29,14,0.7);
+      backdrop-filter: blur(6px);
+      z-index: 10001;
+      align-items: center; justify-content: center;
+    }
+    #add-member-modal-overlay.open { display: flex; }
+    #add-member-modal {
+      background: var(--cream);
+      border: 1px solid rgba(184,114,26,0.3);
+      padding: 2.5rem;
+      width: 100%; max-width: 420px;
+      box-shadow: 0 24px 60px rgba(43,29,14,0.4);
+      animation: fadeUp 0.3s ease both;
+      position: relative;
+    }
+    #add-member-modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .add-member-field {
+      margin-bottom: 1rem;
+    }
+    .add-member-field label {
+      display: block;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-bottom: 0.4rem;
+    }
+    .add-member-field input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(184,114,26,0.25);
+      background: var(--parchment);
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      color: var(--ink);
+      outline: none;
+    }
+    .add-member-field input:focus { border-color: var(--amber); }
+    #add-member-submit {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--ink);
+      color: var(--parchment);
+      border: none;
+      font-family: 'Lora', serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    #add-member-submit:hover { background: var(--amber); color: var(--ink); }
+    #add-member-close {
+      position: absolute; top: 1rem; right: 1.2rem;
+      background: none; border: none;
+      font-size: 1.4rem; cursor: pointer; opacity: 0.4;
+      color: var(--ink);
+    }
+    #add-member-close:hover { opacity: 1; }
     #save-toast {
       position: fixed;
       bottom: 5.5rem; right: 2rem;
@@ -2131,6 +2198,27 @@
         <input id="admin-password-input" type="password" placeholder="Password" />
         <button id="admin-login-btn">Unlock Edit Mode</button>
         <div id="admin-error">Incorrect password. Try again.</div>
+      </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div id="add-member-modal-overlay">
+      <div id="add-member-modal">
+        <button id="add-member-close">×</button>
+        <h3>Add New Member</h3>
+        <div class="add-member-field">
+          <label>Full Name</label>
+          <input id="new-member-name" type="text" placeholder="e.g. Priya Sharma" />
+        </div>
+        <div class="add-member-field">
+          <label>Role</label>
+          <input id="new-member-role" type="text" placeholder="e.g. Member, Founder, Librarian" />
+        </div>
+        <div class="add-member-field">
+          <label>Favourite Book</label>
+          <input id="new-member-fav" type="text" placeholder="e.g. The God of Small Things" />
+        </div>
+        <button id="add-member-submit">Add Member</button>
       </div>
     </div>
 
@@ -2284,6 +2372,173 @@
   // ── Load saved content on page load ──
   markEditables();
   loadSavedContent();
+
+  /* ═══════════════════════════════════════════════════
+     MEMBERS SYSTEM — dynamic render, auto-avatar, add/remove
+  ═══════════════════════════════════════════════════ */
+
+  const AVATAR_COLORS = [
+    ['#8b3a1a','#c0522a'],
+    ['#1a3a5c','#2a5a8c'],
+    ['#2a4a2a','#4a7a4a'],
+    ['#4a2a4a','#7a4a7a'],
+    ['#4a3a1a','#8a6a2a'],
+    ['#1a3a3a','#2a6b6b'],
+    ['#3a1a3a','#6b2a6b'],
+    ['#1a1a3a','#2a2a7a'],
+  ];
+
+  const DEFAULT_MEMBERS = [
+    { name: 'Elena Vasquez',  role: 'Founder & Host', fav: 'One Hundred Years of Solitude' },
+    { name: 'Marcus Chen',    role: 'Librarian',       fav: 'The Brothers Karamazov' },
+    { name: 'Sofia Andreou',  role: 'Secretary',       fav: 'Middlemarch' },
+    { name: 'James Okafor',   role: 'Member',          fav: 'Things Fall Apart' },
+    { name: 'Amara Diallo',   role: 'Member',          fav: 'Half of a Yellow Sun' },
+  ];
+
+  function getInitial(name) {
+    return (name || '?').trim().charAt(0).toUpperCase();
+  }
+
+  function getColorForName(name) {
+    let hash = 0;
+    for (let c of name) hash = c.charCodeAt(0) + ((hash << 5) - hash);
+    const idx = Math.abs(hash) % AVATAR_COLORS.length;
+    return AVATAR_COLORS[idx];
+  }
+
+  function loadMembers() {
+    const saved = localStorage.getItem('biblionis_members');
+    return saved ? JSON.parse(saved) : DEFAULT_MEMBERS;
+  }
+
+  function saveMembers(members) {
+    localStorage.setItem('biblionis_members', JSON.stringify(members));
+  }
+
+  function renderMembers() {
+    const members = loadMembers();
+    const grid = document.getElementById('members-grid');
+    grid.innerHTML = '';
+
+    members.forEach((m, i) => {
+      const [c1, c2] = getColorForName(m.name);
+      const initial = getInitial(m.name);
+      const card = document.createElement('div');
+      card.className = 'member-card reveal visible';
+      card.dataset.memberIndex = i;
+      card.innerHTML = `
+        <button class="member-remove-btn" title="Remove member" onclick="removeMember(${i})">×</button>
+        <div class="member-avatar" style="background:linear-gradient(135deg,${c1},${c2});">${initial}</div>
+        <div class="member-name" data-member-field="name" data-member-index="${i}">${m.name}</div>
+        <div class="member-role" data-member-field="role" data-member-index="${i}">${m.role}</div>
+        <div class="member-fav" data-member-field="fav" data-member-index="${i}">${m.fav}</div>
+      `;
+      grid.appendChild(card);
+    });
+
+    // Add "Your Spot" card
+    const spotCard = document.createElement('div');
+    spotCard.className = 'member-card reveal visible';
+    spotCard.id = 'member-spot-card';
+    spotCard.style.cssText = 'display:flex;flex-direction:column;justify-content:center;align-items:center;border-style:dashed;cursor:pointer;min-height:200px;';
+    spotCard.innerHTML = `
+      <div style="font-size:2rem;color:var(--amber);margin-bottom:0.5rem;">+</div>
+      <div style="font-family:'Playfair Display',serif;font-size:1rem;margin-bottom:0.3rem;">Your Spot</div>
+      <div style="font-size:0.8rem;opacity:0.5;">Join Biblionis</div>
+    `;
+    grid.appendChild(spotCard);
+
+    // Add "Add Member" button (only visible in edit mode)
+    let addBtn = document.getElementById('add-member-btn');
+    if (!addBtn) {
+      addBtn = document.createElement('button');
+      addBtn.id = 'add-member-btn';
+      addBtn.textContent = '+ Add New Member';
+      addBtn.onclick = () => document.getElementById('add-member-modal-overlay').classList.add('open');
+      grid.after(addBtn);
+    }
+
+    // Attach live-edit listeners for member fields
+    grid.querySelectorAll('[data-member-field]').forEach(el => {
+      if (editMode) el.contentEditable = 'true';
+      el.addEventListener('input', () => {
+        const idx = parseInt(el.dataset.memberIndex);
+        const field = el.dataset.memberField;
+        const members = loadMembers();
+        members[idx][field] = el.textContent;
+        // Auto-update avatar initial when name changes
+        if (field === 'name') {
+          const avatar = el.closest('.member-card').querySelector('.member-avatar');
+          const [c1, c2] = getColorForName(el.textContent);
+          avatar.textContent = getInitial(el.textContent);
+          avatar.style.background = `linear-gradient(135deg,${c1},${c2})`;
+        }
+        saveMembers(members);
+      });
+    });
+  }
+
+  function removeMember(index) {
+    if (!confirm('Remove this member?')) return;
+    const members = loadMembers();
+    members.splice(index, 1);
+    saveMembers(members);
+    renderMembers();
+    // Re-apply edit mode to new cards
+    if (editMode) {
+      document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'true');
+    }
+  }
+
+  // Add member form submit
+  document.getElementById('add-member-submit').addEventListener('click', () => {
+    const name = document.getElementById('new-member-name').value.trim();
+    const role = document.getElementById('new-member-role').value.trim() || 'Member';
+    const fav  = document.getElementById('new-member-fav').value.trim() || '—';
+    if (!name) { alert('Please enter a name!'); return; }
+    const members = loadMembers();
+    members.push({ name, role, fav });
+    saveMembers(members);
+    renderMembers();
+    if (editMode) {
+      document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'true');
+    }
+    // Clear & close
+    document.getElementById('new-member-name').value = '';
+    document.getElementById('new-member-role').value = '';
+    document.getElementById('new-member-fav').value = '';
+    document.getElementById('add-member-modal-overlay').classList.remove('open');
+    // Toast
+    const toast = document.getElementById('save-toast');
+    toast.textContent = '✓ Member added!';
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); toast.textContent = '✓ Changes saved!'; }, 2500);
+  });
+
+  // Close add member modal
+  document.getElementById('add-member-close').addEventListener('click', () => {
+    document.getElementById('add-member-modal-overlay').classList.remove('open');
+  });
+  document.getElementById('add-member-modal-overlay').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('add-member-modal-overlay'))
+      document.getElementById('add-member-close').click();
+  });
+
+  // Hook into enterEditMode/exitEditMode to toggle member fields
+  const _origEnter = enterEditMode;
+  enterEditMode = function() {
+    _origEnter();
+    document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'true');
+  };
+  const _origExit = exitEditMode;
+  exitEditMode = function() {
+    _origExit();
+    document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'false');
+  };
+
+  // Initial render
+  renderMembers();
 </script>
 </body>
 </html>
