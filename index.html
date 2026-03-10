@@ -2276,27 +2276,122 @@
     });
   }
 
-  // ── Load saved content from localStorage ──
-  function loadSavedContent() {
-    const saved = JSON.parse(localStorage.getItem('biblionis_content') || '{}');
-    Object.entries(saved).forEach(([key, value]) => {
-      const el = document.querySelector(`[data-editable="${key}"]`);
-      if (el) el.innerHTML = value;
-    });
+  // ── JSONBIN CLOUD SYNC ──
+  const JSONBIN_API_KEY = '$2a$10$pk.x9Bh1DcBvLwMZyaKz5uqbsd3/SeNVIa/MAa.R8YZ3BYgRaW1bK';
+  const JSONBIN_BASE    = 'https://api.jsonbin.io/v3/b';
+
+  // These IDs get filled in after first save and shared via a config bin
+  // CONFIG_BIN stores the IDs of content+members bins so ALL devices find them
+  const CONFIG_BIN_ID = '69b0939b84682b356286f159'; // pre-created config bin
+  let CONTENT_BIN_ID  = null;
+  let MEMBERS_BIN_ID  = null;
+
+  function showToast(msg, color) {
+    const toast = document.getElementById('save-toast');
+    toast.textContent = msg;
+    toast.style.background = color || 'var(--sage)';
+    toast.classList.add('show');
+    setTimeout(() => { toast.classList.remove('show'); }, 2800);
   }
 
-  // ── Save all content to localStorage ──
-  function saveChanges() {
+  async function apiFetch(url, method, body) {
+    const headers = {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_API_KEY
+    };
+    const opts = { method, headers };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+    const res = await fetch(url, opts);
+    return res.json();
+  }
+
+  async function createBin(name, data) {
+    const json = await apiFetch(JSONBIN_BASE, 'POST', data);
+    // also set name header separately won't work in fetch easily, use workaround
+    return json.metadata?.id || null;
+  }
+
+  async function updateBin(binId, data) {
+    return apiFetch(`${JSONBIN_BASE}/${binId}`, 'PUT', data);
+  }
+
+  async function readBin(binId) {
+    const json = await apiFetch(`${JSONBIN_BASE}/${binId}/latest`, 'GET');
+    return json.record || null;
+  }
+
+  // ── Load config (bin IDs) from cloud so ALL devices know where data lives ──
+  async function loadConfig() {
+    try {
+      const config = await readBin(CONFIG_BIN_ID);
+      if (config?.contentBinId) CONTENT_BIN_ID = config.contentBinId;
+      if (config?.membersBinId) MEMBERS_BIN_ID = config.membersBinId;
+    } catch(e) { console.log('Config load failed', e); }
+  }
+
+  // ── Save config so all devices can find the data bins ──
+  async function saveConfig() {
+    try {
+      await updateBin(CONFIG_BIN_ID, {
+        contentBinId: CONTENT_BIN_ID,
+        membersBinId: MEMBERS_BIN_ID
+      });
+    } catch(e) { console.log('Config save failed', e); }
+  }
+
+  // ── Save content to cloud ──
+  async function saveChanges() {
+    showToast('💾 Saving to cloud…', 'var(--amber)');
     const data = {};
     document.querySelectorAll('[data-editable]').forEach(el => {
       data[el.dataset.editable] = el.innerHTML;
     });
-    localStorage.setItem('biblionis_content', JSON.stringify(data));
+    try {
+      if (!CONTENT_BIN_ID) {
+        const json = await apiFetch(JSONBIN_BASE, 'POST', data);
+        CONTENT_BIN_ID = json.metadata?.id;
+        await saveConfig();
+      } else {
+        await updateBin(CONTENT_BIN_ID, data);
+      }
+      showToast('✓ Saved! All devices will see changes.', 'var(--sage)');
+    } catch(e) {
+      showToast('⚠ Save failed. Check internet.', '#7a2e10');
+    }
+  }
 
-    // Show toast
-    const toast = document.getElementById('save-toast');
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+  // ── Load content from cloud ──
+  async function loadSavedContent() {
+    if (!CONTENT_BIN_ID) return;
+    try {
+      const data = await readBin(CONTENT_BIN_ID);
+      if (!data) return;
+      Object.entries(data).forEach(([key, value]) => {
+        const el = document.querySelector(`[data-editable="${key}"]`);
+        if (el) el.innerHTML = value;
+      });
+    } catch(e) { console.log('Could not load content', e); }
+  }
+
+  // ── Save members to cloud ──
+  async function saveMembersCloud(members) {
+    try {
+      if (!MEMBERS_BIN_ID) {
+        const json = await apiFetch(JSONBIN_BASE, 'POST', members);
+        MEMBERS_BIN_ID = json.metadata?.id;
+        await saveConfig();
+      } else {
+        await updateBin(MEMBERS_BIN_ID, members);
+      }
+    } catch(e) { console.log('Could not save members', e); }
+  }
+
+  // ── Load members from cloud ──
+  async function loadMembersCloud() {
+    if (!MEMBERS_BIN_ID) return null;
+    try {
+      return await readBin(MEMBERS_BIN_ID);
+    } catch(e) { return null; }
   }
 
   // ── Enable edit mode ──
@@ -2371,7 +2466,17 @@
 
   // ── Load saved content on page load ──
   markEditables();
-  loadSavedContent();
+
+  // Boot: load config first (gets bin IDs), then load data from those bins
+  (async () => {
+    await loadConfig();
+    await loadSavedContent();
+    const cloudMembers = await loadMembersCloud();
+    if (cloudMembers && cloudMembers.length) {
+      localStorage.setItem('biblionis_members_cache', JSON.stringify(cloudMembers));
+    }
+    renderMembers();
+  })();
 
   /* ═══════════════════════════════════════════════════
      MEMBERS SYSTEM — dynamic render, auto-avatar, add/remove
@@ -2408,12 +2513,16 @@
   }
 
   function loadMembers() {
-    const saved = localStorage.getItem('biblionis_members');
-    return saved ? JSON.parse(saved) : DEFAULT_MEMBERS;
+    // fallback to localStorage cache while cloud loads
+    const cached = localStorage.getItem('biblionis_members_cache');
+    return cached ? JSON.parse(cached) : DEFAULT_MEMBERS;
   }
 
   function saveMembers(members) {
-    localStorage.setItem('biblionis_members', JSON.stringify(members));
+    // save to local cache immediately for instant UI
+    localStorage.setItem('biblionis_members_cache', JSON.stringify(members));
+    // then sync to cloud
+    saveMembersCloud(members);
   }
 
   function renderMembers() {
@@ -2509,11 +2618,7 @@
     document.getElementById('new-member-role').value = '';
     document.getElementById('new-member-fav').value = '';
     document.getElementById('add-member-modal-overlay').classList.remove('open');
-    // Toast
-    const toast = document.getElementById('save-toast');
-    toast.textContent = '✓ Member added!';
-    toast.classList.add('show');
-    setTimeout(() => { toast.classList.remove('show'); toast.textContent = '✓ Changes saved!'; }, 2500);
+    showToast('✓ Member added & synced!', 'var(--sage)');
   });
 
   // Close add member modal
@@ -2536,9 +2641,6 @@
     _origExit();
     document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'false');
   };
-
-  // Initial render
-  renderMembers();
 </script>
 </body>
 </html>
