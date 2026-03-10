@@ -2276,10 +2276,8 @@
     });
   }
 
-  // ── NPOINT CLOUD SYNC ──
-  const NPOINT_BASE = 'https://api.npoint.io/669c574a47d08ee20fd4';
-  let CONTENT_BIN_ID = null;
-  let MEMBERS_BIN_ID = null;
+  // ── FIREBASE REALTIME DATABASE SYNC ──
+  const FIREBASE_URL = 'https://biblionis-default-rtdb.firebaseio.com';
 
   function showToast(msg, color) {
     const toast = document.getElementById('save-toast');
@@ -2289,38 +2287,30 @@
     setTimeout(() => { toast.classList.remove('show'); }, 2800);
   }
 
-  // ── Read from npoint ──
-  async function cloudRead() {
-    try {
-      const res = await fetch(NPOINT_BASE);
-      return await res.json();
-    } catch(e) { return {}; }
-  }
-
-  // ── Write to npoint ──
-  async function cloudWrite(data) {
-    await fetch(NPOINT_BASE, {
-      method: 'POST',
+  // ── Write to Firebase ──
+  async function firebaseWrite(path, data) {
+    await fetch(`${FIREBASE_URL}/${path}.json`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
   }
 
-  // ── Save ALL content + members to cloud in one call ──
+  // ── Read from Firebase ──
+  async function firebaseRead(path) {
+    const res = await fetch(`${FIREBASE_URL}/${path}.json`);
+    return await res.json();
+  }
+
+  // ── Save ALL content to cloud ──
   async function saveChanges() {
     showToast('💾 Saving to cloud…', 'var(--amber)');
     try {
-      // Collect editable text content
       const content = {};
       document.querySelectorAll('[data-editable]').forEach(el => {
         content[el.dataset.editable] = el.innerHTML;
       });
-
-      // Collect members
-      const members = loadMembers();
-
-      // Save everything in one object
-      await cloudWrite({ content, members });
+      await firebaseWrite('content', content);
       showToast('✓ Saved! All devices will see changes.', 'var(--sage)');
     } catch(e) {
       showToast('⚠ Save failed. Check internet.', '#7a2e10');
@@ -2330,30 +2320,26 @@
   // ── Load content from cloud ──
   async function loadSavedContent() {
     try {
-      const data = await cloudRead();
-      if (data?.content) {
-        Object.entries(data.content).forEach(([key, value]) => {
-          const el = document.querySelector(`[data-editable="${key}"]`);
-          if (el) el.innerHTML = value;
-        });
-      }
-      return data;
-    } catch(e) { return {}; }
+      const content = await firebaseRead('content');
+      if (!content) return;
+      Object.entries(content).forEach(([key, value]) => {
+        const el = document.querySelector(`[data-editable="${key}"]`);
+        if (el) el.innerHTML = value;
+      });
+    } catch(e) { console.log('Could not load content', e); }
   }
 
-  // ── Save members to cloud (called when members change) ──
+  // ── Save members to cloud ──
   async function saveMembersCloud(members) {
     try {
-      const existing = await cloudRead();
-      await cloudWrite({ ...existing, members });
+      await firebaseWrite('members', members);
     } catch(e) { console.log('Could not save members', e); }
   }
 
   // ── Load members from cloud ──
   async function loadMembersCloud() {
     try {
-      const data = await cloudRead();
-      return data?.members || null;
+      return await firebaseRead('members');
     } catch(e) { return null; }
   }
 
@@ -2430,10 +2416,10 @@
   // ── Load saved content on page load ──
   markEditables();
 
-  // Boot: load everything from cloud on startup
+  // Boot: load everything from Firebase on startup
   (async () => {
-    const data = await loadSavedContent();
-    const cloudMembers = data?.members;
+    await loadSavedContent();
+    const cloudMembers = await loadMembersCloud();
     if (cloudMembers && cloudMembers.length) {
       localStorage.setItem('biblionis_members_cache', JSON.stringify(cloudMembers));
     }
