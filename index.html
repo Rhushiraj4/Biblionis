@@ -2276,15 +2276,10 @@
     });
   }
 
-  // ── JSONBIN CLOUD SYNC ──
-  const JSONBIN_API_KEY = '$2a$10$pk.x9Bh1DcBvLwMZyaKz5uqbsd3/SeNVIa/MAa.R8YZ3BYgRaW1bK';
-  const JSONBIN_BASE    = 'https://api.jsonbin.io/v3/b';
-
-  // These IDs get filled in after first save and shared via a config bin
-  // CONFIG_BIN stores the IDs of content+members bins so ALL devices find them
-  const CONFIG_BIN_ID = '69b0939b84682b356286f159'; // pre-created config bin
-  let CONTENT_BIN_ID  = null;
-  let MEMBERS_BIN_ID  = null;
+  // ── NPOINT CLOUD SYNC ──
+  const NPOINT_BASE = 'https://api.npoint.io/669c574a47d08ee20fd4';
+  let CONTENT_BIN_ID = null;
+  let MEMBERS_BIN_ID = null;
 
   function showToast(msg, color) {
     const toast = document.getElementById('save-toast');
@@ -2294,66 +2289,38 @@
     setTimeout(() => { toast.classList.remove('show'); }, 2800);
   }
 
-  async function apiFetch(url, method, body) {
-    const headers = {
-      'Content-Type': 'application/json',
-      'X-Master-Key': JSONBIN_API_KEY
-    };
-    const opts = { method, headers };
-    if (body !== undefined) opts.body = JSON.stringify(body);
-    const res = await fetch(url, opts);
-    return res.json();
-  }
-
-  async function createBin(name, data) {
-    const json = await apiFetch(JSONBIN_BASE, 'POST', data);
-    // also set name header separately won't work in fetch easily, use workaround
-    return json.metadata?.id || null;
-  }
-
-  async function updateBin(binId, data) {
-    return apiFetch(`${JSONBIN_BASE}/${binId}`, 'PUT', data);
-  }
-
-  async function readBin(binId) {
-    const json = await apiFetch(`${JSONBIN_BASE}/${binId}/latest`, 'GET');
-    return json.record || null;
-  }
-
-  // ── Load config (bin IDs) from cloud so ALL devices know where data lives ──
-  async function loadConfig() {
+  // ── Read from npoint ──
+  async function cloudRead() {
     try {
-      const config = await readBin(CONFIG_BIN_ID);
-      if (config?.contentBinId) CONTENT_BIN_ID = config.contentBinId;
-      if (config?.membersBinId) MEMBERS_BIN_ID = config.membersBinId;
-    } catch(e) { console.log('Config load failed', e); }
+      const res = await fetch(NPOINT_BASE);
+      return await res.json();
+    } catch(e) { return {}; }
   }
 
-  // ── Save config so all devices can find the data bins ──
-  async function saveConfig() {
-    try {
-      await updateBin(CONFIG_BIN_ID, {
-        contentBinId: CONTENT_BIN_ID,
-        membersBinId: MEMBERS_BIN_ID
-      });
-    } catch(e) { console.log('Config save failed', e); }
+  // ── Write to npoint ──
+  async function cloudWrite(data) {
+    await fetch(NPOINT_BASE, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
   }
 
-  // ── Save content to cloud ──
+  // ── Save ALL content + members to cloud in one call ──
   async function saveChanges() {
     showToast('💾 Saving to cloud…', 'var(--amber)');
-    const data = {};
-    document.querySelectorAll('[data-editable]').forEach(el => {
-      data[el.dataset.editable] = el.innerHTML;
-    });
     try {
-      if (!CONTENT_BIN_ID) {
-        const json = await apiFetch(JSONBIN_BASE, 'POST', data);
-        CONTENT_BIN_ID = json.metadata?.id;
-        await saveConfig();
-      } else {
-        await updateBin(CONTENT_BIN_ID, data);
-      }
+      // Collect editable text content
+      const content = {};
+      document.querySelectorAll('[data-editable]').forEach(el => {
+        content[el.dataset.editable] = el.innerHTML;
+      });
+
+      // Collect members
+      const members = loadMembers();
+
+      // Save everything in one object
+      await cloudWrite({ content, members });
       showToast('✓ Saved! All devices will see changes.', 'var(--sage)');
     } catch(e) {
       showToast('⚠ Save failed. Check internet.', '#7a2e10');
@@ -2362,35 +2329,31 @@
 
   // ── Load content from cloud ──
   async function loadSavedContent() {
-    if (!CONTENT_BIN_ID) return;
     try {
-      const data = await readBin(CONTENT_BIN_ID);
-      if (!data) return;
-      Object.entries(data).forEach(([key, value]) => {
-        const el = document.querySelector(`[data-editable="${key}"]`);
-        if (el) el.innerHTML = value;
-      });
-    } catch(e) { console.log('Could not load content', e); }
+      const data = await cloudRead();
+      if (data?.content) {
+        Object.entries(data.content).forEach(([key, value]) => {
+          const el = document.querySelector(`[data-editable="${key}"]`);
+          if (el) el.innerHTML = value;
+        });
+      }
+      return data;
+    } catch(e) { return {}; }
   }
 
-  // ── Save members to cloud ──
+  // ── Save members to cloud (called when members change) ──
   async function saveMembersCloud(members) {
     try {
-      if (!MEMBERS_BIN_ID) {
-        const json = await apiFetch(JSONBIN_BASE, 'POST', members);
-        MEMBERS_BIN_ID = json.metadata?.id;
-        await saveConfig();
-      } else {
-        await updateBin(MEMBERS_BIN_ID, members);
-      }
+      const existing = await cloudRead();
+      await cloudWrite({ ...existing, members });
     } catch(e) { console.log('Could not save members', e); }
   }
 
   // ── Load members from cloud ──
   async function loadMembersCloud() {
-    if (!MEMBERS_BIN_ID) return null;
     try {
-      return await readBin(MEMBERS_BIN_ID);
+      const data = await cloudRead();
+      return data?.members || null;
     } catch(e) { return null; }
   }
 
@@ -2467,11 +2430,10 @@
   // ── Load saved content on page load ──
   markEditables();
 
-  // Boot: load config first (gets bin IDs), then load data from those bins
+  // Boot: load everything from cloud on startup
   (async () => {
-    await loadConfig();
-    await loadSavedContent();
-    const cloudMembers = await loadMembersCloud();
+    const data = await loadSavedContent();
+    const cloudMembers = data?.members;
     if (cloudMembers && cloudMembers.length) {
       localStorage.setItem('biblionis_members_cache', JSON.stringify(cloudMembers));
     }
