@@ -1224,11 +1224,11 @@
         <div class="book-title">The Secret History</div>
       </div>
       <div class="hero-stat stat-1">
-        <div class="hero-stat-num">24</div>
+        <div class="hero-stat-num" id="hero-books-count">24</div>
         <div class="hero-stat-label">Books Read</div>
       </div>
       <div class="hero-stat stat-2">
-        <div class="hero-stat-num">12</div>
+        <div class="hero-stat-num" id="hero-members-count">12</div>
         <div class="hero-stat-label">Members</div>
       </div>
     </div>
@@ -1542,7 +1542,7 @@
         <label class="reg-label">Your Feedback</label>
         <textarea class="reg-input" id="fb-text" rows="4" placeholder="What did you love? What could be better? Any book suggestions?" style="resize:vertical; font-family:'Lora',serif; background:var(--cream);"></textarea>
       </div>
-      <button class="reg-submit-btn" type="button" onclick="submitFeedback()" style="background:var(--ink);">Submit Feedback →</button>
+      <button class="reg-submit-btn" type="button" onclick="submitFeedback()" style="background:var(--amber); color:var(--ink);">Submit Feedback →</button>
       <div id="fb-success" style="display:none; margin-top:1rem; color:var(--sage); font-size:0.9rem;">✓ Thank you for your feedback!</div>
     </div>
 
@@ -2742,18 +2742,63 @@
     list.innerHTML = 'Loading…';
     try {
       const regs = await firebaseRead('registrations') || [];
-      if (!regs.length) { list.innerHTML = '<p style="opacity:0.5;">No registrations yet.</p>'; return; }
-      list.innerHTML = regs.map((r, i) => `
-        <div class="reg-entry">
-          <div class="reg-entry-name">${i+1}. ${r.name}</div>
-          <div class="reg-entry-detail">📧 ${r.email} ${r.phone ? `· 📞 ${r.phone}` : ''}</div>
-          <div class="reg-entry-detail">📚 Favourite: ${r.favbook || '—'} · Genre: ${r.genre || '—'}</div>
-          ${r.why ? `<div class="reg-entry-detail" style="margin-top:0.3rem;font-style:italic;">"${r.why}"</div>` : ''}
-          <div class="reg-entry-detail" style="opacity:0.4;">Registered: ${r.date}</div>
+      const removed = await firebaseRead('registrations_removed') || [];
+
+      if (!regs.length && !removed.length) {
+        list.innerHTML = '<p style="opacity:0.5;">No registrations yet.</p>';
+        return;
+      }
+
+      const activeHTML = regs.length ? `
+        <div style="font-family:'Playfair Display',serif; font-size:1rem; margin-bottom:1rem; color:var(--amber);">
+          Active (${regs.length})
         </div>
-      `).join('');
+        ${regs.map((r, i) => `
+          <div class="reg-entry" style="position:relative;">
+            <button onclick="removeRegistration(${i})" style="position:absolute;top:0.5rem;right:0;background:var(--rust);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.8rem;line-height:1;">×</button>
+            <div class="reg-entry-name">${i+1}. ${r.name}</div>
+            <div class="reg-entry-detail">📧 ${r.email} ${r.phone ? `· 📞 ${r.phone}` : ''}</div>
+            <div class="reg-entry-detail">📚 Favourite: ${r.favbook || '—'} · Genre: ${r.genre || '—'}</div>
+            ${r.why ? `<div class="reg-entry-detail" style="font-style:italic;">"${r.why}"</div>` : ''}
+            <div class="reg-entry-detail" style="opacity:0.4;">Registered: ${r.date}</div>
+          </div>
+        `).join('')}
+      ` : '<p style="opacity:0.5; margin-bottom:1.5rem;">No active registrations.</p>';
+
+      const removedHTML = removed.length ? `
+        <div style="font-family:'Playfair Display',serif; font-size:1rem; margin:1.5rem 0 1rem; color:var(--rust); opacity:0.7;">
+          History / Removed (${removed.length})
+        </div>
+        ${removed.map((r, i) => `
+          <div class="reg-entry" style="opacity:0.5;">
+            <div class="reg-entry-name" style="text-decoration:line-through;">${r.name}</div>
+            <div class="reg-entry-detail">📧 ${r.email}</div>
+            <div class="reg-entry-detail" style="opacity:0.4;">Registered: ${r.date} · Removed: ${r.removedDate}</div>
+          </div>
+        `).join('')}
+      ` : '';
+
+      list.innerHTML = activeHTML + removedHTML;
     } catch(e) {
       list.innerHTML = '<p style="color:var(--rust);">Could not load registrations.</p>';
+    }
+  }
+
+  async function removeRegistration(idx) {
+    if (!confirm('Remove this registration? They will be moved to history.')) return;
+    try {
+      let regs = await firebaseRead('registrations') || [];
+      let removed = await firebaseRead('registrations_removed') || [];
+      const person = regs[idx];
+      person.removedDate = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+      removed.unshift(person);
+      regs.splice(idx, 1);
+      await firebaseWrite('registrations', regs);
+      await firebaseWrite('registrations_removed', removed);
+      showToast('✓ Registration removed', 'var(--sage)');
+      viewRegistrations(); // refresh modal
+    } catch(e) {
+      showToast('⚠ Could not remove. Try again.', '#7a2e10');
     }
   }
 
@@ -2993,6 +3038,9 @@
     // update books finished counter
     const counter = document.getElementById('books-finished-count');
     if (counter) { counter.dataset.count = books.length; counter.textContent = books.length; }
+    // also update hero stat
+    const heroBooks = document.getElementById('hero-books-count');
+    if (heroBooks) heroBooks.textContent = books.length;
   }
 
   function removeCompleted(idx) {
@@ -3054,6 +3102,9 @@
       memberCounter.dataset.count = members.length;
       memberCounter.textContent = members.length;
     }
+    // Also update hero stat
+    const heroCounter = document.getElementById('hero-members-count');
+    if (heroCounter) heroCounter.textContent = members.length;
 
     members.forEach((m, i) => {
       const [c1, c2] = getColorForName(m.name);
