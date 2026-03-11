@@ -1569,63 +1569,55 @@
     <h2>Book <em>Reviews</em></h2>
     <p style="max-width:520px; opacity:0.65; margin-top:0.5rem;">Honest thoughts from our members — what moved us, surprised us, and stayed with us.</p>
   </div>
-
   <div id="reviews-grid">
-    <div class="review-card featured reveal">
-      <span class="review-quote-mark">"</span>
-      <div class="review-stars">★★★★★</div>
-      <p class="review-text">Zevin's novel wrecked me in the most wonderful way. It's ostensibly about video games, but it's really about creativity, grief, and what it means to love someone across decades. I found myself thinking about it for weeks after we discussed it — which is the highest praise I can give a book.</p>
-      <div class="review-footer">
-        <div class="reviewer-info">
-          <h5>Elena Vasquez</h5>
-          <div class="reviewer-book">on Tomorrow, and Tomorrow, and Tomorrow</div>
-        </div>
-        <div class="reviewer-avatar-sm" style="background: linear-gradient(135deg,#8b3a1a,#c0522a);">E</div>
-      </div>
-    </div>
-
-    <div class="review-card reveal">
-      <span class="review-quote-mark">"</span>
-      <div class="review-stars">★★★★★</div>
-      <p class="review-text">Normal People is deceptively simple. Rooney writes with such precision about how young people love and wound each other. Our discussion was one of our most heated ever.</p>
-      <div class="review-footer">
-        <div class="reviewer-info">
-          <h5>Sofia Andreou</h5>
-          <div class="reviewer-book">on Normal People</div>
-        </div>
-        <div class="reviewer-avatar-sm" style="background: linear-gradient(135deg,#2a4a2a,#4a7a4a);">S</div>
-      </div>
-    </div>
-
-    <div class="review-card reveal">
-      <span class="review-quote-mark">"</span>
-      <div class="review-stars">★★★★☆</div>
-      <p class="review-text">All The Light We Cannot See is stunning prose. Doerr earns every award it received. I did wish the pacing was tighter, but the radio sequences are unlike anything I've read.</p>
-      <div class="review-footer">
-        <div class="reviewer-info">
-          <h5>Marcus Chen</h5>
-          <div class="reviewer-book">on All The Light We Cannot See</div>
-        </div>
-        <div class="reviewer-avatar-sm" style="background: linear-gradient(135deg,#1a3a5c,#2a5a8c);">M</div>
-      </div>
-    </div>
-
-    <div class="review-card reveal">
-      <span class="review-quote-mark">"</span>
-      <div class="review-stars">★★★★★</div>
-      <p class="review-text">Lessons in Chemistry felt like a warm hug and a war cry at once. Elizabeth Zott is one of the most memorable characters I've ever encountered. I laughed, I cried, I cheered.</p>
-      <div class="review-footer">
-        <div class="reviewer-info">
-          <h5>Amara Diallo</h5>
-          <div class="reviewer-book">on Lessons in Chemistry</div>
-        </div>
-        <div class="reviewer-avatar-sm" style="background: linear-gradient(135deg,#4a3a1a,#8a6a2a);">A</div>
-      </div>
-    </div>
+    <!-- Rendered by JS -->
   </div>
 </section>
 
 <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
+
+<!-- FEEDBACK -->
+<section id="feedback" style="background:var(--parchment); padding:6rem 4rem;">
+  <div class="reveal">
+    <div class="section-label">Share Your Thoughts</div>
+    <h2>Club <em>Feedback</em></h2>
+    <p style="max-width:520px; opacity:0.65; margin-top:0.5rem; margin-bottom:3rem;">We love hearing from our members. Share what you enjoyed, what could be better, or just leave a note for the group!</p>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start;">
+    <!-- Feedback form -->
+    <div class="reveal">
+      <div class="reg-field" style="margin-bottom:1rem;">
+        <label class="reg-label">Your Name</label>
+        <input class="reg-input" id="fb-name" type="text" placeholder="Your name" style="background:var(--cream);" />
+      </div>
+      <div class="reg-field" style="margin-bottom:1rem;">
+        <label class="reg-label">Overall Club Experience</label>
+        <div id="fb-stars" style="display:flex; gap:0.3rem; font-size:1.8rem; cursor:pointer; margin-top:0.3rem;">
+          <span class="fb-star" data-val="1">☆</span>
+          <span class="fb-star" data-val="2">☆</span>
+          <span class="fb-star" data-val="3">☆</span>
+          <span class="fb-star" data-val="4">☆</span>
+          <span class="fb-star" data-val="5">☆</span>
+        </div>
+      </div>
+      <div class="reg-field" style="margin-bottom:1.5rem;">
+        <label class="reg-label">Your Feedback</label>
+        <textarea class="reg-input" id="fb-text" rows="4" placeholder="What did you love? What could be better? Any book suggestions?" style="resize:vertical; font-family:'Lora',serif; background:var(--cream);"></textarea>
+      </div>
+      <button class="reg-submit-btn" type="button" onclick="submitFeedback()" style="background:var(--ink);">Submit Feedback →</button>
+      <div id="fb-success" style="display:none; margin-top:1rem; color:var(--sage); font-size:0.9rem;">✓ Thank you for your feedback!</div>
+    </div>
+
+    <!-- Feedback list -->
+    <div class="reveal">
+      <div id="feedback-list" style="display:flex; flex-direction:column; gap:1rem;">
+        <!-- Rendered by JS -->
+      </div>
+      <div id="feedback-empty" style="opacity:0.45; font-style:italic; font-size:0.95rem;">No feedback yet — be the first to share! 😊</div>
+    </div>
+  </div>
+</section>
 
 <!-- READING CHALLENGES -->
 <section id="challenges">
@@ -1732,36 +1724,71 @@
 
 <div class="divider"><div class="divider-line"></div><div class="divider-icon">✦</div><div class="divider-line"></div></div>
 
-<!-- JOIN -->
-<section id="join">
-  <div class="reveal">
-    <div style="font-size:2.2rem; margin-bottom:1.2rem; opacity:0.75;">🕯️</div>
-    <div class="section-label" style="color: var(--amber-light);">Become a Member</div>
-    <h2>Open a New <em>Chapter</em></h2>
-    <p>We're a small, warm group and we'd love to have you. Enter your email and we'll be in touch before the next meeting.</p>
+<!-- REGISTRATION -->
+<section id="join" style="padding:6rem 4rem;">
+  <div class="reveal" style="max-width:700px; margin:0 auto;">
+    <div style="font-size:2.2rem; margin-bottom:1.2rem; opacity:0.75; text-align:center;">🕯️</div>
+    <div class="section-label" style="color:var(--amber-light); text-align:center;">Become a Member</div>
+    <h2 style="text-align:center;">Open a New <em>Chapter</em></h2>
+    <p style="text-align:center; opacity:0.65; margin-bottom:3rem;">Fill in your details below and we'll welcome you at our next meeting. We'd love to have you!</p>
 
-    <div class="join-form">
-      <input type="email" placeholder="your@email.com" />
-      <button type="button">Join Now</button>
+    <div id="reg-form-wrap">
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; margin-bottom:1.2rem;">
+        <div class="reg-field">
+          <label class="reg-label">Full Name *</label>
+          <input class="reg-input" id="reg-name" type="text" placeholder="Your full name" />
+        </div>
+        <div class="reg-field">
+          <label class="reg-label">Email Address *</label>
+          <input class="reg-input" id="reg-email" type="email" placeholder="your@email.com" />
+        </div>
+        <div class="reg-field">
+          <label class="reg-label">Phone Number</label>
+          <input class="reg-input" id="reg-phone" type="tel" placeholder="+91 ..." />
+        </div>
+        <div class="reg-field">
+          <label class="reg-label">Favourite Genre</label>
+          <select class="reg-input" id="reg-genre">
+            <option value="">Select a genre</option>
+            <option>Literary Fiction</option>
+            <option>Historical Fiction</option>
+            <option>Mystery & Thriller</option>
+            <option>Science Fiction</option>
+            <option>Fantasy</option>
+            <option>Non-Fiction</option>
+            <option>Poetry</option>
+            <option>Classics</option>
+            <option>Romance</option>
+            <option>Biography</option>
+          </select>
+        </div>
+      </div>
+      <div class="reg-field" style="margin-bottom:1.2rem;">
+        <label class="reg-label">Favourite Book of All Time</label>
+        <input class="reg-input" id="reg-favbook" type="text" placeholder="The book that changed your life..." />
+      </div>
+      <div class="reg-field" style="margin-bottom:2rem;">
+        <label class="reg-label">Why do you want to join Biblionis?</label>
+        <textarea class="reg-input" id="reg-why" rows="3" placeholder="Tell us a little about yourself and why you love books..." style="resize:vertical; font-family:'Lora',serif;"></textarea>
+      </div>
+      <button id="reg-submit" type="button" onclick="submitRegistration()">
+        Register for Biblionis →
+      </button>
+      <div id="reg-error" style="color:var(--rust); font-size:0.85rem; margin-top:0.75rem; display:none;">Please fill in your name and email!</div>
     </div>
 
-    <div class="join-perks">
-      <div class="perk">
-        <div class="perk-icon">📚</div>
-        <div class="perk-text">Monthly selections</div>
-      </div>
-      <div class="perk">
-        <div class="perk-icon">☕</div>
-        <div class="perk-text">Cozy gatherings</div>
-      </div>
-      <div class="perk">
-        <div class="perk-icon">🍵</div>
-        <div class="perk-text">Good company</div>
-      </div>
-      <div class="perk">
-        <div class="perk-icon">✉️</div>
-        <div class="perk-text">Monthly newsletter</div>
-      </div>
+    <!-- Success message -->
+    <div id="reg-success" style="display:none; text-align:center; padding:3rem 0;">
+      <div style="font-size:3rem; margin-bottom:1rem;">📚</div>
+      <h3 style="font-family:'Playfair Display',serif; font-size:1.8rem; font-style:italic; margin-bottom:0.5rem;">Welcome to Biblionis!</h3>
+      <p style="opacity:0.65;">Thank you for registering. We'll be in touch before the next meeting. Can't wait to read with you!</p>
+    </div>
+
+    <div class="join-perks" style="margin-top:3rem;">
+      <div class="perk"><div class="perk-icon">📚</div><div class="perk-text">Monthly selections</div></div>
+      <div class="perk"><div class="perk-icon">☕</div><div class="perk-text">Cozy gatherings</div></div>
+      <div class="perk"><div class="perk-icon">🍵</div><div class="perk-text">Good company</div></div>
+      <div class="perk"><div class="perk-icon">✉️</div><div class="perk-text">Monthly newsletter</div></div>
     </div>
   </div>
 </section>
@@ -1851,23 +1878,7 @@
     });
   }, { threshold: 0.2 });
   document.querySelectorAll('#challenges-grid').forEach(el => barObserver.observe(el));
-  document.querySelector('.join-form button').addEventListener('click', () => {
-    const input = document.querySelector('.join-form input');
-    if (input.value && input.value.includes('@')) {
-      input.value = '';
-      input.placeholder = '✓ You\'re on the list — see you soon!';
-      input.style.color = 'var(--amber-light)';
-    } else {
-      input.style.borderColor = 'var(--rust)';
-      input.placeholder = 'Please enter a valid email';
-      setTimeout(() => {
-        input.style.borderColor = '';
-        input.placeholder = 'your@email.com';
-      }, 2000);
-    }
-  });
-
-  // Book card hover animation for the hero books
+  // Book card hover animation
   document.querySelector('.book-stack')?.addEventListener('mouseenter', function() {
     this.classList.add('hovered');
   });
@@ -2051,7 +2062,140 @@
     }
     body.edit-mode [data-editable]:hover::after { opacity: 1; }
 
-    /* Member remove button */
+    /* ── REGISTRATION FORM ── */
+    #join { background: linear-gradient(160deg, #2b1d0e 0%, #1a1008 100%); color: var(--parchment); }
+    #join h2 { color: var(--parchment); }
+    .reg-label {
+      display: block;
+      font-size: 0.72rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-bottom: 0.4rem;
+      font-family: 'Lora', serif;
+    }
+    .reg-input {
+      width: 100%;
+      padding: 0.85rem 1.1rem;
+      background: rgba(242,232,213,0.08);
+      border: 1px solid rgba(184,114,26,0.25);
+      color: var(--parchment);
+      font-family: 'Lora', serif;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .reg-input:focus { border-color: var(--amber); background: rgba(242,232,213,0.12); }
+    .reg-input option { background: #2b1d0e; color: var(--parchment); }
+    #reg-submit, .reg-submit-btn {
+      width: 100%;
+      padding: 1rem;
+      background: var(--amber);
+      border: none;
+      color: var(--ink);
+      font-family: 'Lora', serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    #reg-submit:hover, .reg-submit-btn:hover { background: var(--amber-light); transform: translateY(-2px); }
+
+    /* ── DYNAMIC STARS ── */
+    .star-rating { display:flex; gap:2px; cursor:default; font-size:1rem; }
+    .star-rating.editable { cursor:pointer; }
+    .star-rating .star { color: var(--amber); transition: transform 0.1s; }
+    .star-rating.editable .star:hover { transform: scale(1.2); }
+    .star-rating .star.empty { color: rgba(184,114,26,0.25); }
+
+    /* ── FEEDBACK ── */
+    .feedback-item {
+      background: var(--cream);
+      border: 1px solid rgba(184,114,26,0.15);
+      padding: 1.2rem 1.5rem;
+      border-radius: 2px;
+    }
+    .feedback-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    .feedback-item-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .feedback-item-stars { color: var(--amber); font-size: 0.85rem; }
+    .feedback-item-text { font-size: 0.88rem; opacity: 0.7; line-height: 1.65; }
+    .feedback-item-date { font-size: 0.72rem; opacity: 0.4; margin-top: 0.4rem; }
+
+    /* Admin view registrations button */
+    #view-regs-btn {
+      display: none;
+      margin: 1rem auto 0;
+      padding: 0.6rem 1.5rem;
+      background: rgba(184,114,26,0.15);
+      border: 1px solid rgba(184,114,26,0.3);
+      color: var(--amber-light);
+      font-family: 'Lora', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    body.edit-mode #view-regs-btn { display: block; }
+
+    /* Registrations modal */
+    #regs-modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(43,29,14,0.8);
+      backdrop-filter: blur(6px);
+      z-index: 10002;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 4rem 2rem;
+      overflow-y: auto;
+    }
+    #regs-modal-overlay.open { display: flex; }
+    #regs-modal {
+      background: var(--cream);
+      width: 100%; max-width: 700px;
+      padding: 2.5rem;
+      position: relative;
+    }
+    #regs-modal h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+    .reg-entry {
+      border-bottom: 1px solid rgba(184,114,26,0.1);
+      padding: 1rem 0;
+    }
+    .reg-entry:last-child { border: none; }
+    .reg-entry-name {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .reg-entry-detail { font-size: 0.82rem; opacity: 0.6; margin-top: 0.2rem; }
+    #regs-close {
+      position: absolute; top: 1rem; right: 1.2rem;
+      background: none; border: none;
+      font-size: 1.4rem; cursor: pointer; opacity: 0.4;
+    }
+    #regs-close:hover { opacity: 1; }
+    @media (max-width: 900px) {
+      #join { padding: 4rem 1.5rem; }
+      #join > div > div:first-of-type { grid-template-columns: 1fr; }
+      #feedback { padding: 4rem 1.5rem; }
+      #feedback > div:last-child { grid-template-columns: 1fr; }
+    }
     .member-remove-btn {
       display: none;
       position: absolute;
@@ -2185,6 +2329,15 @@
 
   // ── Inject HTML elements ──
   document.body.insertAdjacentHTML('beforeend', `
+    <!-- Registrations Modal (admin only) -->
+    <div id="regs-modal-overlay">
+      <div id="regs-modal">
+        <button id="regs-close" onclick="document.getElementById('regs-modal-overlay').classList.remove('open')">×</button>
+        <h3>📋 Registrations</h3>
+        <div id="regs-list">Loading...</div>
+      </div>
+    </div>
+
     <!-- Admin FAB -->
     <button id="admin-fab" title="Admin Login">⚙</button>
 
@@ -2423,12 +2576,259 @@
     if (cloudMembers && cloudMembers.length) {
       localStorage.setItem('biblionis_members_cache', JSON.stringify(cloudMembers));
     }
+    await loadReviewsCloud();
     renderMembers();
+    renderReviews();
+    await loadFeedbacks();
   })();
 
   /* ═══════════════════════════════════════════════════
-     MEMBERS SYSTEM — dynamic render, auto-avatar, add/remove
+     DYNAMIC REVIEWS WITH CLICKABLE STARS
   ═══════════════════════════════════════════════════ */
+  const DEFAULT_REVIEWS = [
+    { stars: 5, text: "Zevin's novel wrecked me in the most wonderful way. It's ostensibly about video games, but it's really about creativity, grief, and what it means to love someone across decades.", reviewer: "Elena Vasquez", book: "Tomorrow, and Tomorrow, and Tomorrow", avatarColor: ['#8b3a1a','#c0522a'], featured: true },
+    { stars: 5, text: "Normal People is deceptively simple. Rooney writes with such precision about how young people love and wound each other. Our discussion was one of our most heated ever.", reviewer: "Sofia Andreou", book: "Normal People", avatarColor: ['#2a4a2a','#4a7a4a'], featured: false },
+    { stars: 4, text: "All The Light We Cannot See is stunning prose. Doerr earns every award it received. I did wish the pacing was tighter, but the radio sequences are unlike anything I've read.", reviewer: "Marcus Chen", book: "All The Light We Cannot See", avatarColor: ['#1a3a5c','#2a5a8c'], featured: false },
+    { stars: 5, text: "Lessons in Chemistry felt like a warm hug and a war cry at once. Elizabeth Zott is one of the most memorable characters I've ever encountered. I laughed, I cried, I cheered.", reviewer: "Amara Diallo", book: "Lessons in Chemistry", avatarColor: ['#4a3a1a','#8a6a2a'], featured: false },
+  ];
+
+  function starsHTML(count, total=5, editable=false, idx=null) {
+    let html = `<div class="star-rating${editable ? ' editable' : ''}" ${idx!==null ? `data-review-idx="${idx}"` : ''}>`;
+    for (let i = 1; i <= total; i++) {
+      html += `<span class="star${i > count ? ' empty' : ''}" data-val="${i}" ${editable ? `onclick="setReviewStar(${idx},${i})"` : ''}>★</span>`;
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function loadReviews() {
+    const cached = localStorage.getItem('biblionis_reviews_cache');
+    return cached ? JSON.parse(cached) : DEFAULT_REVIEWS;
+  }
+
+  function saveReviewsCloud(reviews) {
+    localStorage.setItem('biblionis_reviews_cache', JSON.stringify(reviews));
+    firebaseWrite('reviews', reviews).catch(e => console.log('review save error', e));
+  }
+
+  function renderReviews() {
+    const reviews = loadReviews();
+    const grid = document.getElementById('reviews-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    reviews.forEach((r, i) => {
+      const card = document.createElement('div');
+      card.className = `review-card${r.featured ? ' featured' : ''} reveal visible`;
+      card.innerHTML = `
+        <span class="review-quote-mark">"</span>
+        ${starsHTML(r.stars, 5, editMode, i)}
+        <p class="review-text" ${editMode ? 'contenteditable="true"' : ''} data-review-text="${i}">${r.text}</p>
+        <div class="review-footer">
+          <div class="reviewer-info">
+            <h5 ${editMode ? 'contenteditable="true"' : ''} data-review-reviewer="${i}">${r.reviewer}</h5>
+            <div class="reviewer-book" ${editMode ? 'contenteditable="true"' : ''} data-review-book="${i}">on ${r.book}</div>
+          </div>
+          <div class="reviewer-avatar-sm" style="background:linear-gradient(135deg,${r.avatarColor[0]},${r.avatarColor[1]});">${r.reviewer.charAt(0)}</div>
+        </div>
+      `;
+      // Attach input listeners
+      ['review-text','review-reviewer','review-book'].forEach(attr => {
+        const el = card.querySelector(`[data-${attr}="${i}"]`);
+        if (el) el.addEventListener('input', () => {
+          const reviews = loadReviews();
+          if (attr === 'review-text') reviews[i].text = el.textContent;
+          if (attr === 'review-reviewer') reviews[i].reviewer = el.textContent;
+          if (attr === 'review-book') reviews[i].book = el.textContent.replace(/^on\s*/i,'');
+          saveReviewsCloud(reviews);
+        });
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function setReviewStar(idx, val) {
+    if (!editMode) return;
+    const reviews = loadReviews();
+    reviews[idx].stars = val;
+    saveReviewsCloud(reviews);
+    renderReviews();
+    showToast('★ Rating updated!', 'var(--amber)');
+  }
+
+  // Load reviews from Firebase on boot
+  async function loadReviewsCloud() {
+    try {
+      const data = await firebaseRead('reviews');
+      if (data && data.length) {
+        localStorage.setItem('biblionis_reviews_cache', JSON.stringify(data));
+      }
+    } catch(e) {}
+  }
+
+  /* ═══════════════════════════════════════════════════
+     REGISTRATION FORM
+  ═══════════════════════════════════════════════════ */
+  async function submitRegistration() {
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    if (!name || !email) {
+      document.getElementById('reg-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('reg-error').style.display = 'none';
+    document.getElementById('reg-submit').textContent = 'Submitting…';
+    document.getElementById('reg-submit').disabled = true;
+
+    const entry = {
+      name,
+      email,
+      phone:   document.getElementById('reg-phone').value.trim(),
+      genre:   document.getElementById('reg-genre').value,
+      favbook: document.getElementById('reg-favbook').value.trim(),
+      why:     document.getElementById('reg-why').value.trim(),
+      date:    new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+    };
+
+    try {
+      // Read existing registrations and append
+      let regs = await firebaseRead('registrations') || [];
+      if (!Array.isArray(regs)) regs = [];
+      regs.push(entry);
+      await firebaseWrite('registrations', regs);
+      document.getElementById('reg-form-wrap').style.display = 'none';
+      document.getElementById('reg-success').style.display = 'block';
+    } catch(e) {
+      document.getElementById('reg-submit').textContent = 'Register for Biblionis →';
+      document.getElementById('reg-submit').disabled = false;
+      alert('Something went wrong. Please try again!');
+    }
+  }
+
+  // Admin: view registrations
+  async function viewRegistrations() {
+    document.getElementById('regs-modal-overlay').classList.add('open');
+    const list = document.getElementById('regs-list');
+    list.innerHTML = 'Loading…';
+    try {
+      const regs = await firebaseRead('registrations') || [];
+      if (!regs.length) { list.innerHTML = '<p style="opacity:0.5;">No registrations yet.</p>'; return; }
+      list.innerHTML = regs.map((r, i) => `
+        <div class="reg-entry">
+          <div class="reg-entry-name">${i+1}. ${r.name}</div>
+          <div class="reg-entry-detail">📧 ${r.email} ${r.phone ? `· 📞 ${r.phone}` : ''}</div>
+          <div class="reg-entry-detail">📚 Favourite: ${r.favbook || '—'} · Genre: ${r.genre || '—'}</div>
+          ${r.why ? `<div class="reg-entry-detail" style="margin-top:0.3rem;font-style:italic;">"${r.why}"</div>` : ''}
+          <div class="reg-entry-detail" style="opacity:0.4;">Registered: ${r.date}</div>
+        </div>
+      `).join('');
+    } catch(e) {
+      list.innerHTML = '<p style="color:var(--rust);">Could not load registrations.</p>';
+    }
+  }
+
+  // Add View Registrations button in admin toolbar
+  const viewRegsBtn = document.createElement('button');
+  viewRegsBtn.className = 'toolbar-btn';
+  viewRegsBtn.textContent = '📋 Registrations';
+  viewRegsBtn.onclick = viewRegistrations;
+  viewRegsBtn.id = 'view-regs-btn';
+  document.querySelector('.toolbar-right').prepend(viewRegsBtn);
+
+  /* ═══════════════════════════════════════════════════
+     FEEDBACK SYSTEM
+  ═══════════════════════════════════════════════════ */
+  let fbStarVal = 0;
+
+  // Star hover/click for feedback form
+  document.querySelectorAll('.fb-star').forEach(star => {
+    star.addEventListener('click', () => {
+      fbStarVal = parseInt(star.dataset.val);
+      document.querySelectorAll('.fb-star').forEach((s, idx) => {
+        s.textContent = idx < fbStarVal ? '★' : '☆';
+        s.style.color = idx < fbStarVal ? 'var(--amber)' : 'rgba(184,114,26,0.3)';
+      });
+    });
+    star.addEventListener('mouseover', () => {
+      const val = parseInt(star.dataset.val);
+      document.querySelectorAll('.fb-star').forEach((s, idx) => {
+        s.textContent = idx < val ? '★' : '☆';
+        s.style.color = idx < val ? 'var(--amber-light)' : 'rgba(184,114,26,0.3)';
+      });
+    });
+    star.addEventListener('mouseout', () => {
+      document.querySelectorAll('.fb-star').forEach((s, idx) => {
+        s.textContent = idx < fbStarVal ? '★' : '☆';
+        s.style.color = idx < fbStarVal ? 'var(--amber)' : 'rgba(184,114,26,0.3)';
+      });
+    });
+  });
+
+  async function submitFeedback() {
+    const name = document.getElementById('fb-name').value.trim() || 'Anonymous';
+    const text = document.getElementById('fb-text').value.trim();
+    if (!text) { alert('Please write some feedback!'); return; }
+
+    const entry = {
+      name,
+      stars: fbStarVal,
+      text,
+      date: new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })
+    };
+
+    try {
+      let feedbacks = await firebaseRead('feedbacks') || [];
+      if (!Array.isArray(feedbacks)) feedbacks = [];
+      feedbacks.unshift(entry); // newest first
+      await firebaseWrite('feedbacks', feedbacks);
+      document.getElementById('fb-name').value = '';
+      document.getElementById('fb-text').value = '';
+      fbStarVal = 0;
+      document.querySelectorAll('.fb-star').forEach(s => { s.textContent = '☆'; s.style.color = ''; });
+      document.getElementById('fb-success').style.display = 'block';
+      setTimeout(() => document.getElementById('fb-success').style.display = 'none', 3000);
+      renderFeedbacks(feedbacks);
+    } catch(e) { alert('Could not submit. Please try again!'); }
+  }
+
+  function renderFeedbacks(feedbacks) {
+    const list = document.getElementById('feedback-list');
+    const empty = document.getElementById('feedback-empty');
+    if (!feedbacks || !feedbacks.length) {
+      list.innerHTML = '';
+      empty.style.display = 'block';
+      return;
+    }
+    empty.style.display = 'none';
+    list.innerHTML = feedbacks.map(f => `
+      <div class="feedback-item">
+        <div class="feedback-item-header">
+          <div class="feedback-item-name">${f.name}</div>
+          <div class="feedback-item-stars">${'★'.repeat(f.stars)}${'☆'.repeat(5-f.stars)}</div>
+        </div>
+        <div class="feedback-item-text">${f.text}</div>
+        <div class="feedback-item-date">${f.date}</div>
+      </div>
+    `).join('');
+  }
+
+  async function loadFeedbacks() {
+    try {
+      const feedbacks = await firebaseRead('feedbacks') || [];
+      renderFeedbacks(feedbacks);
+    } catch(e) {}
+  }
+
+  // Hook reviews into edit mode toggle
+  const _origEnterOld = enterEditMode;
+  enterEditMode = function() {
+    _origEnterOld();
+    renderReviews();
+  };
+  const _origExitOld = exitEditMode;
+  exitEditMode = function() {
+    _origExitOld();
+    renderReviews();
+  };
 
   const AVATAR_COLORS = [
     ['#8b3a1a','#c0522a'],
