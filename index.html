@@ -1478,7 +1478,7 @@
         <div class="stat-card-label">Books Finished</div>
       </div>
       <div class="stat-card reveal">
-        <div class="stat-card-num" id="live-member-count" data-count="12">0</div>
+        <div class="stat-card-num" id="live-member-count" data-count="0">0</div>
         <div class="stat-card-label">Active Members</div>
       </div>
       <div class="stat-card reveal">
@@ -3047,6 +3047,13 @@
     const members = loadMembers();
     const grid = document.getElementById('members-grid');
     grid.innerHTML = '';
+
+    // Update active member count stat
+    const memberCounter = document.getElementById('live-member-count');
+    if (memberCounter) {
+      memberCounter.dataset.count = members.length;
+      memberCounter.textContent = members.length;
+    }
 
     members.forEach((m, i) => {
       const [c1, c2] = getColorForName(m.name);
