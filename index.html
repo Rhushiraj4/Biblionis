@@ -2754,8 +2754,11 @@
           Active (${regs.length})
         </div>
         ${regs.map((r, i) => `
-          <div class="reg-entry" style="position:relative;">
-            <button onclick="removeRegistration(${i})" style="position:absolute;top:0.5rem;right:0;background:var(--rust);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.8rem;line-height:1;">×</button>
+          <div class="reg-entry" style="position:relative; padding-right:4rem;">
+            <div style="position:absolute;top:0.5rem;right:0;display:flex;gap:0.3rem;">
+              <button onclick="approveRegistration(${i})" title="Approve — add to members" style="background:var(--sage);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.75rem;line-height:1;">✓</button>
+              <button onclick="removeRegistration(${i})" title="Remove" style="background:var(--rust);color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.8rem;line-height:1;">×</button>
+            </div>
             <div class="reg-entry-name">${i+1}. ${r.name}</div>
             <div class="reg-entry-detail">📧 ${r.email} ${r.phone ? `· 📞 ${r.phone}` : ''}</div>
             <div class="reg-entry-detail">📚 Favourite: ${r.favbook || '—'} · Genre: ${r.genre || '—'}</div>
@@ -2786,6 +2789,38 @@
       list.innerHTML = activeHTML + removedHTML;
     } catch(e) {
       list.innerHTML = '<p style="color:var(--rust);">Could not load registrations.</p>';
+    }
+  }
+
+  async function approveRegistration(idx) {
+    if (!confirm('Approve this person and add them to Members?')) return;
+    try {
+      let regs = await firebaseRead('registrations') || [];
+      const person = regs[idx];
+
+      // Add to members
+      const members = loadMembers();
+      members.push({
+        name: person.name,
+        role: 'Member',
+        fav: person.favbook || '—'
+      });
+      saveMembers(members);
+
+      // Remove from registrations
+      let removed = await firebaseRead('registrations_removed') || [];
+      person.removedDate = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+      person.approvedDate = person.removedDate;
+      removed.unshift({ ...person, approvedAs: 'Member' });
+      regs.splice(idx, 1);
+      await firebaseWrite('registrations', regs);
+      await firebaseWrite('registrations_removed', removed);
+
+      renderMembers();
+      showToast(`✓ ${person.name} added as Member!`, 'var(--sage)');
+      viewRegistrations(); // refresh modal
+    } catch(e) {
+      showToast('⚠ Could not approve. Try again.', '#7a2e10');
     }
   }
 
@@ -3101,10 +3136,15 @@
     const grid = document.getElementById('members-grid');
     grid.innerHTML = '';
 
-    // Update ALL member counters forcefully
-    [document.getElementById('live-member-count'), document.getElementById('hero-members-count')].forEach(el => {
-      if (el) { el.dataset.count = members.length; el.textContent = members.length; }
-    });
+    // Count = founders + registered people
+    async function updateTotalCount() {
+      const regs = await firebaseRead('registrations').catch(() => []) || [];
+      const total = members.length + (Array.isArray(regs) ? regs.length : 0);
+      [document.getElementById('live-member-count'), document.getElementById('hero-members-count')].forEach(el => {
+        if (el) { el.dataset.count = total; el.textContent = total; }
+      });
+    }
+    updateTotalCount();
 
     members.forEach((m, i) => {
       const [c1, c2] = getColorForName(m.name);
