@@ -1474,7 +1474,7 @@
 
     <div class="stats-row">
       <div class="stat-card reveal">
-        <div class="stat-card-num" data-count="24">0</div>
+        <div class="stat-card-num" id="books-finished-count" data-count="8">0</div>
         <div class="stat-card-label">Books Finished</div>
       </div>
       <div class="stat-card reveal">
@@ -1492,71 +1492,8 @@
     </div>
   </div>
 
-  <div class="completed-shelf reveal">
-    <div class="completed-row">
-      <div class="completed-num">01</div>
-      <div class="completed-info">
-        <h4>Normal People</h4>
-        <p class="completed-meta">Sally Rooney · Contemporary Fiction <span class="completed-month-tag">Jan 2026</span></p>
-      </div>
-      <div class="completed-rating">★★★★★</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">02</div>
-      <div class="completed-info">
-        <h4>Tomorrow, and Tomorrow, and Tomorrow</h4>
-        <p class="completed-meta">Gabrielle Zevin · Literary Fiction <span class="completed-month-tag">Dec 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★★</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">03</div>
-      <div class="completed-info">
-        <h4>All The Light We Cannot See</h4>
-        <p class="completed-meta">Anthony Doerr · Historical Fiction <span class="completed-month-tag">Nov 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★☆</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">04</div>
-      <div class="completed-info">
-        <h4>The Midnight Library</h4>
-        <p class="completed-meta">Matt Haig · Philosophical Fiction <span class="completed-month-tag">Oct 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★☆</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">05</div>
-      <div class="completed-info">
-        <h4>Lessons in Chemistry</h4>
-        <p class="completed-meta">Bonnie Garmus · Historical Fiction <span class="completed-month-tag">Sep 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★★</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">06</div>
-      <div class="completed-info">
-        <h4>A Little Life</h4>
-        <p class="completed-meta">Hanya Yanagihara · Literary Fiction <span class="completed-month-tag">Aug 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★★</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">07</div>
-      <div class="completed-info">
-        <h4>The Kite Runner</h4>
-        <p class="completed-meta">Khaled Hosseini · Literary Fiction <span class="completed-month-tag">Jul 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★★</div>
-    </div>
-    <div class="completed-row">
-      <div class="completed-num">08</div>
-      <div class="completed-info">
-        <h4>Hamnet</h4>
-        <p class="completed-meta">Maggie O'Farrell · Historical Fiction <span class="completed-month-tag">Jun 2025</span></p>
-      </div>
-      <div class="completed-rating">★★★★☆</div>
-    </div>
+  <div id="completed-shelf" class="completed-shelf reveal">
+    <!-- Rendered by JS -->
   </div>
 </section>
 
@@ -2650,8 +2587,10 @@
     if (cloudMembers && cloudMembers.length) {
       localStorage.setItem('biblionis_members_cache', JSON.stringify(cloudMembers));
     }
+    await loadCompletedCloud();
     await loadReviewsCloud();
     renderMembers();
+    renderCompleted();
     renderReviews();
     await loadFeedbacks();
     await loadSignupCount();
@@ -2933,6 +2872,145 @@
     ['#1a1a3a','#2a2a7a'],
   ];
 
+  /* ═══════════════════════════════════════════════════
+     COMPLETED BOOKS SYSTEM — dynamic, editable, star ratings
+  ═══════════════════════════════════════════════════ */
+  const DEFAULT_COMPLETED = [
+    { title: 'Normal People',                    author: 'Sally Rooney',      genre: 'Contemporary Fiction', month: 'Jan 2026', stars: 5 },
+    { title: 'Tomorrow, and Tomorrow, and Tomorrow', author: 'Gabrielle Zevin', genre: 'Literary Fiction',    month: 'Dec 2025', stars: 5 },
+    { title: 'All The Light We Cannot See',      author: 'Anthony Doerr',     genre: 'Historical Fiction',   month: 'Nov 2025', stars: 4 },
+    { title: 'The Midnight Library',             author: 'Matt Haig',         genre: 'Philosophical Fiction', month: 'Oct 2025', stars: 4 },
+    { title: 'Lessons in Chemistry',             author: 'Bonnie Garmus',     genre: 'Historical Fiction',   month: 'Sep 2025', stars: 5 },
+    { title: 'A Little Life',                    author: 'Hanya Yanagihara',  genre: 'Literary Fiction',     month: 'Aug 2025', stars: 5 },
+    { title: 'The Kite Runner',                  author: 'Khaled Hosseini',   genre: 'Literary Fiction',     month: 'Jul 2025', stars: 5 },
+    { title: 'Hamnet',                           author: "Maggie O'Farrell",  genre: 'Historical Fiction',   month: 'Jun 2025', stars: 4 },
+  ];
+
+  function loadCompleted() {
+    const cached = localStorage.getItem('biblionis_completed_cache');
+    return cached ? JSON.parse(cached) : DEFAULT_COMPLETED;
+  }
+
+  function saveCompleted(books) {
+    localStorage.setItem('biblionis_completed_cache', JSON.stringify(books));
+    firebaseWrite('completed', books)
+      .then(() => showToast('★ Saved to cloud!', 'var(--sage)'))
+      .catch(() => showToast('★ Saved locally only — check internet.', 'var(--amber)'));
+  }
+
+  function renderCompleted() {
+    const books = loadCompleted();
+    const shelf = document.getElementById('completed-shelf');
+    if (!shelf) return;
+    shelf.innerHTML = '';
+
+    books.forEach((b, i) => {
+      const row = document.createElement('div');
+      row.className = 'completed-row';
+      row.innerHTML = `
+        <div class="completed-num">${String(i + 1).padStart(2, '0')}</div>
+        <div class="completed-info">
+          <h4 data-cb-field="title" data-cb-idx="${i}" ${editMode ? 'contenteditable="true"' : ''}>${b.title}</h4>
+          <p class="completed-meta">
+            <span data-cb-field="author" data-cb-idx="${i}" ${editMode ? 'contenteditable="true"' : ''}>${b.author}</span>
+            &nbsp;·&nbsp;
+            <span data-cb-field="genre" data-cb-idx="${i}" ${editMode ? 'contenteditable="true"' : ''}>${b.genre}</span>
+            &nbsp;
+            <span class="completed-month-tag" data-cb-field="month" data-cb-idx="${i}" ${editMode ? 'contenteditable="true"' : ''}>${b.month}</span>
+          </p>
+        </div>
+        <div class="completed-rating-stars" data-cb-idx="${i}" style="display:flex; gap:3px; cursor:${editMode ? 'pointer' : 'default'};">
+          ${[1,2,3,4,5].map(v => `<span class="cb-star" data-val="${v}" data-idx="${i}" style="color:${v <= b.stars ? 'var(--amber)' : 'rgba(184,114,26,0.25)'}; font-size:1rem;">★</span>`).join('')}
+        </div>
+        ${editMode ? `<button onclick="removeCompleted(${i})" style="background:var(--rust);color:white;border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:0.85rem;margin-left:0.5rem;flex-shrink:0;">×</button>` : ''}
+      `;
+
+      // Text field listeners
+      ['title','author','genre','month'].forEach(field => {
+        const el = row.querySelector(`[data-cb-field="${field}"]`);
+        if (el) el.addEventListener('input', () => {
+          const books = loadCompleted();
+          books[i][field] = el.textContent;
+          saveCompleted(books);
+        });
+      });
+
+      // Star click listeners
+      row.querySelectorAll('.cb-star').forEach(star => {
+        star.addEventListener('mouseover', () => {
+          if (!editMode) return;
+          const val = parseInt(star.dataset.val);
+          row.querySelectorAll('.cb-star').forEach((s, si) => {
+            s.style.color = si < val ? 'var(--amber-light)' : 'rgba(184,114,26,0.25)';
+          });
+        });
+        star.addEventListener('mouseout', () => {
+          if (!editMode) return;
+          const books = loadCompleted();
+          const cur = books[parseInt(star.dataset.idx)].stars;
+          row.querySelectorAll('.cb-star').forEach((s, si) => {
+            s.style.color = si < cur ? 'var(--amber)' : 'rgba(184,114,26,0.25)';
+          });
+        });
+        star.addEventListener('click', () => {
+          if (!editMode) return;
+          const val = parseInt(star.dataset.val);
+          const idx = parseInt(star.dataset.idx);
+          const books = loadCompleted();
+          books[idx].stars = val;
+          saveCompleted(books);
+          renderCompleted();
+        });
+      });
+
+      shelf.appendChild(row);
+    });
+
+    // Add Book button in edit mode
+    if (editMode) {
+      const addBtn = document.createElement('button');
+      addBtn.style.cssText = 'margin-top:1rem; padding:0.75rem 2rem; background:none; border:2px dashed rgba(184,114,26,0.4); color:var(--amber); font-family:"Lora",serif; font-size:0.85rem; letter-spacing:0.1em; text-transform:uppercase; cursor:pointer; width:100%;';
+      addBtn.textContent = '+ Add Completed Book';
+      addBtn.onclick = () => {
+        const title  = prompt('Book title:');
+        if (!title) return;
+        const author = prompt('Author:') || '—';
+        const genre  = prompt('Genre:') || '—';
+        const month  = prompt('Month read (e.g. Mar 2026):') || '—';
+        const stars  = parseInt(prompt('Rating (1-5):')) || 5;
+        const books  = loadCompleted();
+        books.unshift({ title, author, genre, month, stars: Math.min(5, Math.max(1, stars)) });
+        saveCompleted(books);
+        renderCompleted();
+        // update counter
+        const counter = document.getElementById('books-finished-count');
+        if (counter) { counter.dataset.count = books.length; counter.textContent = books.length; }
+        showToast('✓ Book added!', 'var(--sage)');
+      };
+      shelf.appendChild(addBtn);
+    }
+
+    // update books finished counter
+    const counter = document.getElementById('books-finished-count');
+    if (counter) { counter.dataset.count = books.length; counter.textContent = books.length; }
+  }
+
+  function removeCompleted(idx) {
+    if (!confirm('Remove this book?')) return;
+    const books = loadCompleted();
+    books.splice(idx, 1);
+    saveCompleted(books);
+    renderCompleted();
+  }
+
+  // Load completed from Firebase on boot
+  async function loadCompletedCloud() {
+    try {
+      const data = await firebaseRead('completed');
+      if (data && data.length) localStorage.setItem('biblionis_completed_cache', JSON.stringify(data));
+    } catch(e) {}
+  }
+
   const DEFAULT_MEMBERS = [
     { name: 'Elena Vasquez',  role: 'Founder & Host', fav: 'One Hundred Years of Solitude' },
     { name: 'Marcus Chen',    role: 'Librarian',       fav: 'The Brothers Karamazov' },
@@ -3075,13 +3153,15 @@
   enterEditMode = function() {
     _origEnter();
     document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'true');
-    renderReviews(); // re-render reviews with editable fields
+    renderReviews();
+    renderCompleted();
   };
   const _origExit = exitEditMode;
   exitEditMode = function() {
     _origExit();
     document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'false');
-    renderReviews(); // re-render reviews without editable fields
+    renderReviews();
+    renderCompleted();
   };
 </script>
 </body>
