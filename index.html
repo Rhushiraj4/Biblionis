@@ -1478,7 +1478,7 @@
         <div class="stat-card-label">Books Finished</div>
       </div>
       <div class="stat-card reveal">
-        <div class="stat-card-num" data-count="12">0</div>
+        <div class="stat-card-num" id="live-member-count" data-count="12">0</div>
         <div class="stat-card-label">Active Members</div>
       </div>
       <div class="stat-card reveal">
@@ -1486,8 +1486,8 @@
         <div class="stat-card-label">Years Running</div>
       </div>
       <div class="stat-card reveal">
-        <div class="stat-card-num" data-count="8">0</div>
-        <div class="stat-card-label">Genres Explored</div>
+        <div class="stat-card-num" id="live-signup-count" data-count="0">0</div>
+        <div class="stat-card-label">New Signups 🎉</div>
       </div>
     </div>
   </div>
@@ -1881,6 +1881,75 @@
   // Book card hover animation
   document.querySelector('.book-stack')?.addEventListener('mouseenter', function() {
     this.classList.add('hovered');
+  });
+
+  // ── Visual star picker for completed books in edit mode ──
+  // Inject star picker HTML
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="star-picker" style="
+      display:none; position:fixed; z-index:99999;
+      background:var(--cream); border:1px solid rgba(184,114,26,0.3);
+      padding:1rem 1.5rem; box-shadow:0 8px 32px rgba(43,29,14,0.25);
+      border-radius:4px; text-align:center;
+    ">
+      <div style="font-family:'Lora',serif; font-size:0.75rem; letter-spacing:0.1em; text-transform:uppercase; opacity:0.5; margin-bottom:0.6rem;">Tap to rate</div>
+      <div id="star-picker-stars" style="display:flex; gap:6px; font-size:1.8rem; cursor:pointer;">
+        <span data-v="1">☆</span>
+        <span data-v="2">☆</span>
+        <span data-v="3">☆</span>
+        <span data-v="4">☆</span>
+        <span data-v="5">☆</span>
+      </div>
+    </div>
+  `);
+
+  let activeRatingEl = null;
+
+  const starPicker = document.getElementById('star-picker');
+  const pickerStars = document.querySelectorAll('#star-picker-stars span');
+
+  function updatePickerStars(val) {
+    pickerStars.forEach((s, i) => {
+      s.textContent = i < val ? '★' : '☆';
+      s.style.color = i < val ? 'var(--amber)' : 'rgba(184,114,26,0.3)';
+    });
+  }
+
+  pickerStars.forEach(s => {
+    s.addEventListener('mouseover', () => updatePickerStars(parseInt(s.dataset.v)));
+    s.addEventListener('mouseout', () => {
+      if (activeRatingEl) {
+        const cur = (activeRatingEl.textContent.match(/★/g) || []).length;
+        updatePickerStars(cur);
+      }
+    });
+    s.addEventListener('click', () => {
+      if (!activeRatingEl) return;
+      const val = parseInt(s.dataset.v);
+      activeRatingEl.textContent = '★'.repeat(val) + '☆'.repeat(5 - val);
+      starPicker.style.display = 'none';
+      activeRatingEl = null;
+      showToast('★ Rating updated! Click 💾 to save.', 'var(--amber)');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!editMode) return;
+    const ratingEl = e.target.closest('.completed-rating');
+    if (ratingEl) {
+      activeRatingEl = ratingEl;
+      const cur = (ratingEl.textContent.match(/★/g) || []).length;
+      updatePickerStars(cur);
+      // Position picker near the clicked element
+      const rect = ratingEl.getBoundingClientRect();
+      starPicker.style.display = 'block';
+      starPicker.style.top = (rect.bottom + 8 + window.scrollY) + 'px';
+      starPicker.style.left = rect.left + 'px';
+      e.stopPropagation();
+    } else if (!e.target.closest('#star-picker')) {
+      starPicker.style.display = 'none';
+      activeRatingEl = null;
+    }
   });
 
   /* ═══════════════════════════════════════════════════
@@ -2303,6 +2372,10 @@
       color: var(--ink);
     }
     #add-member-close:hover { opacity: 1; }
+
+    body.edit-mode .completed-rating { cursor: pointer; letter-spacing: 3px; }
+    body.edit-mode .completed-rating:hover { color: var(--amber-light); }
+
     #save-toast {
       position: fixed;
       bottom: 5.5rem; right: 2rem;
@@ -2402,6 +2475,7 @@
       '.member-name', '.member-role', '.member-fav',
       '.meeting-details h4', '.meeting-meta',
       '.meeting-month', '.meeting-day',
+      '.completed-rating',
       '.completed-info h4', '.completed-meta',
       '.review-text', '.reviewer-info h5', '.reviewer-book',
       '.challenge-title', '.challenge-desc',
@@ -2580,6 +2654,7 @@
     renderMembers();
     renderReviews();
     await loadFeedbacks();
+    await loadSignupCount();
   })();
 
   /* ═══════════════════════════════════════════════════
@@ -2690,18 +2765,35 @@
     };
 
     try {
-      // Read existing registrations and append
       let regs = await firebaseRead('registrations') || [];
       if (!Array.isArray(regs)) regs = [];
       regs.push(entry);
       await firebaseWrite('registrations', regs);
       document.getElementById('reg-form-wrap').style.display = 'none';
       document.getElementById('reg-success').style.display = 'block';
+      // Update live signup counter instantly
+      updateSignupCounter(regs.length);
     } catch(e) {
       document.getElementById('reg-submit').textContent = 'Register for Biblionis →';
       document.getElementById('reg-submit').disabled = false;
       alert('Something went wrong. Please try again!');
     }
+  }
+
+  // ── Update the live signup counter on the page ──
+  function updateSignupCounter(count) {
+    const el = document.getElementById('live-signup-count');
+    if (!el) return;
+    el.dataset.count = count;
+    el.textContent = count;
+  }
+
+  // ── Load live signup count from Firebase on page load ──
+  async function loadSignupCount() {
+    try {
+      const regs = await firebaseRead('registrations') || [];
+      updateSignupCounter(Array.isArray(regs) ? regs.length : 0);
+    } catch(e) {}
   }
 
   // Admin: view registrations
@@ -2983,11 +3075,13 @@
   enterEditMode = function() {
     _origEnter();
     document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'true');
+    renderReviews(); // re-render reviews with editable fields
   };
   const _origExit = exitEditMode;
   exitEditMode = function() {
     _origExit();
     document.querySelectorAll('[data-member-field]').forEach(el => el.contentEditable = 'false');
+    renderReviews(); // re-render reviews without editable fields
   };
 </script>
 </body>
