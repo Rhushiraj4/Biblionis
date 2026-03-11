@@ -2766,16 +2766,21 @@
       ` : '<p style="opacity:0.5; margin-bottom:1.5rem;">No active registrations.</p>';
 
       const removedHTML = removed.length ? `
-        <div style="font-family:'Playfair Display',serif; font-size:1rem; margin:1.5rem 0 1rem; color:var(--rust); opacity:0.7;">
-          History / Removed (${removed.length})
-        </div>
-        ${removed.map((r, i) => `
-          <div class="reg-entry" style="opacity:0.5;">
-            <div class="reg-entry-name" style="text-decoration:line-through;">${r.name}</div>
-            <div class="reg-entry-detail">📧 ${r.email}</div>
-            <div class="reg-entry-detail" style="opacity:0.4;">Registered: ${r.date} · Removed: ${r.removedDate}</div>
+        <div style="margin-top:1.5rem;">
+          <button onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.textContent.includes('▶') ? '▼ History / Removed (${removed.length})' : '▶ History / Removed (${removed.length})';"
+            style="background:none;border:none;cursor:pointer;font-family:'Lora',serif;font-size:0.85rem;color:var(--rust);opacity:0.6;padding:0;letter-spacing:0.05em;">
+            ▶ History / Removed (${removed.length})
+          </button>
+          <div style="display:none; margin-top:0.75rem;">
+            ${removed.map(r => `
+              <div class="reg-entry" style="opacity:0.45;">
+                <div class="reg-entry-name" style="text-decoration:line-through;">${r.name}</div>
+                <div class="reg-entry-detail">📧 ${r.email}</div>
+                <div class="reg-entry-detail" style="opacity:0.6;">Registered: ${r.date} · Removed: ${r.removedDate}</div>
+              </div>
+            `).join('')}
           </div>
-        `).join('')}
+        </div>
       ` : '';
 
       list.innerHTML = activeHTML + removedHTML;
@@ -3096,15 +3101,10 @@
     const grid = document.getElementById('members-grid');
     grid.innerHTML = '';
 
-    // Update active member count stat
-    const memberCounter = document.getElementById('live-member-count');
-    if (memberCounter) {
-      memberCounter.dataset.count = members.length;
-      memberCounter.textContent = members.length;
-    }
-    // Also update hero stat
-    const heroCounter = document.getElementById('hero-members-count');
-    if (heroCounter) heroCounter.textContent = members.length;
+    // Update ALL member counters forcefully
+    [document.getElementById('live-member-count'), document.getElementById('hero-members-count')].forEach(el => {
+      if (el) { el.dataset.count = members.length; el.textContent = members.length; }
+    });
 
     members.forEach((m, i) => {
       const [c1, c2] = getColorForName(m.name);
